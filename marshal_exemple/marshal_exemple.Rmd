@@ -1,0 +1,112 @@
+---
+title: "marshal_example"
+output: html_document
+date: "2023-02-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+**MARSHAL**, stand for MAize Root System Hydraulic Architecture soLver. It combines the root architecture model  CRootBox [@CrootBox] with the method for solving water flow in root system hydraulic architecture (RSHA) of Meunier et al. [-@Meunier2017-ue] with the method for computing macroscopic parameter of Couvreur et al. [-@Couvreur2012]. MARSHAL calculates root system conductance, 1 to 3-D uptake distribution and other upscaled variables (plant leaf water potential or transpiration) for any combination of structural and functional traits.
+
+## How to use MARSHAL in the R environment
+
+To run this example, the marshal package is required. This package can be found on [GitHub](https://github.com/MARSHAL-ROOT/marshal).
+Alternatively, by simply executing the following line in the R environment:
+
+
+```{r load_libraries}
+########################################################################
+# 1 : LOAD THE LIBRARIES AND SOURCE FILES
+########################################################################
+
+#library(tidyverse)
+library(ggplot2)
+library(plyr)
+library(readr)
+library(data.table)
+library(dplyr)
+library(Matrix)
+
+# Custom functions
+source("inputs/io_function.R") # CROOTBOX
+source("inputs/getSUF.R") # MARSHAL
+```
+
+
+
+# Boundary conditions of MARSHAL.
+
+The inputs of MARSHAL are:
+
+- The hydraulic properties of the roots.
+- The water potential of the soil.
+- The root system architecture (RSA).
+- The initial pressure strength that pulls water out of the collar.
+
+We first start to load the hydraulic parameters, from the rootn the soil and the atmosphere
+
+```{r load_hydro_params}
+# MARSHAL PARAMETERS
+
+# E. We load the default parameter sets for the simulation 
+psiCollar <- -15000
+soil <- read_csv("inputs/soil.csv")
+conductivities <- read_csv("inputs/conductivities.csv")
+```
+
+Then we load the root system, that was generated using CPlantBox [[here](https://github.com/water-fluxes/day-3-plant-scale-cplantbox)]. We plot the root system to see what it looks like. 
+
+```{r load_root}
+# Root system
+
+rootsystem <- fread("outputs/first_example.txt", header = T)
+
+rootsystem %>%
+  ggplot() +
+  theme_classic() +
+  geom_segment(aes(x = x1, y = z1, xend = x2, yend = z2), alpha=0.9) +
+  coord_fixed()
+```
+
+
+We now have all the information we need to run the MARSHAL code in itself (one command). 
+
+```{r compute_hydro}
+########################################################################
+# 4 : RUN MARSHAL
+########################################################################
+      
+# Run MARSHAL
+hydraulics <- getSUF(rootsystem, conductivities, soil, psiCollar)
+```
+
+Then we can get all the parameters of interest and add them to the root system information generated with CPlantBox
+
+```{r cars}
+hydraulic_archi <- hydraulics$root_system
+hydraulic_archi$suf <- hydraulics$suf[,1]
+hydraulic_archi$kr <- hydraulics$kr[,1]
+hydraulic_archi$kx <- hydraulics$kx[,1]
+hydraulic_archi$jr <- hydraulics$jr[,1]
+hydraulic_archi$jxl <- hydraulics$jxl[,1]
+hydraulic_archi$psi <- hydraulics$psi[,1]
+
+
+print(paste0("KRS = ",hydraulics$krs))
+print(paste0("Potential transpiration = ",hydraulics$tpot))
+print(paste0("Actual transpiration = ",hydraulics$tact))
+```
+And we use this information to visuale the hydraulic properties of the root system, either in a detailled way : 
+
+```{r plot_archi}
+hydraulic_archi %>%
+  ggplot() +
+  theme_classic() +
+  geom_segment(aes(x = x1, y = z1, xend = x2, yend = z2, col = psi), alpha=0.9) +
+  scale_color_viridis_c() + 
+  coord_fixed()
+```
