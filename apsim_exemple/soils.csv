@@ -1,0 +1,5 @@
+type,ASW1,ASW2,ASW3
+dry,30,30,30
+wet,50,50,50
+top_dry,30,40,50
+bottom_dry,50,40,30

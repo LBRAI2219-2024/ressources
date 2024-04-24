@@ -1,0 +1,21 @@
+plant,param,value
+maize,RUE,1.6
+maize,TEc,9
+maize,RGR,20
+maize,Potential DLAI,0.1
+maize,k,0.45
+maize,Initial LAI,1.5
+maize,Initial Biomass,45
+maize,kl1,0.06
+maize,kl2,0.05
+maize,kl3,0.05
+sorghum,RUE,1.25
+sorghum,TEc,9
+sorghum,RGR,20
+sorghum,Potential DLAI,0.1
+sorghum,k,0.45
+sorghum,Initial LAI,1.5
+sorghum,Initial Biomass,45
+sorghum,kl1,0.07
+sorghum,kl2,0.07
+sorghum,kl3,0.07
