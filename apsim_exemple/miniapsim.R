@@ -161,10 +161,3 @@ input <- data.frame(RUE = temp$value[temp$param == "RUE"],
       sim <- rbind(sim, temp)
     }
     
-    sim$sim <- rs$counter
-    rs$counter <- rs$counter+1
-    
-    
-    rs$sim <- rbind(rs$sim, sim)
-    
-  })
